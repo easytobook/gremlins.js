@@ -76,17 +76,16 @@ define(function(require) {
             showAction:       defaultShowAction,
             logger:           {},
             randomizer:       new Chance(),
-            scrollableElements: []
+            scrollableElements: [window]
         };
-
         /**
          * @mixes config
          */
         function scrollerGremlin() {
-            config.scrollableElements.push(documentElement);
-
             var indexEl = config.randomizer.natural({ max: config.scrollableElements.length  - 1 });
             var el = config.scrollableElements[indexEl];
+            if(el === window) el = documentElement;
+            else el = document.querySelector(el);
 
             var position = config.positionSelector(el),
                 scrollX = position[0],
@@ -94,7 +93,6 @@ define(function(require) {
 
             el.scrollLeft = scrollX;
             el.scrollTop = scrollY;
-
 
             if (typeof config.showAction == 'function') {
                 config.showAction(scrollX, scrollY);
