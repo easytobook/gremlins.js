@@ -37,15 +37,16 @@ define(function(require) {
             documentElement = document.documentElement,
             body = document.body;
 
-        var defaultPositionSelector = function() {
-            var documentWidth = Math.max(body.scrollWidth, body.offsetWidth, documentElement.scrollWidth, documentElement.offsetWidth, documentElement.clientWidth),
-                documentHeight = Math.max(body.scrollHeight, body.offsetHeight, documentElement.scrollHeight, documentElement.offsetHeight, documentElement.clientHeight);
+        var defaultPositionSelector = function(element) {
+            var documentWidth = Math.max(body.scrollWidth, body.offsetWidth, element.scrollWidth, element.offsetWidth, element.clientWidth),
+                documentHeight = Math.max(body.scrollHeight, body.offsetHeight, element.scrollHeight, element.offsetHeight, element.clientHeight);
 
             return [
-                config.randomizer.natural({ max: documentWidth  - documentElement.clientWidth }),
-                config.randomizer.natural({ max: documentHeight  - documentElement.clientHeight })
+                config.randomizer.natural({ max: documentWidth  - element.clientWidth }),
+                config.randomizer.natural({ max: documentHeight  - element.clientHeight })
             ];
         };
+
 
         var defaultShowAction = function(scrollX, scrollY) {
             var clickSignal = document.createElement('div');
@@ -74,18 +75,26 @@ define(function(require) {
             positionSelector: defaultPositionSelector,
             showAction:       defaultShowAction,
             logger:           {},
-            randomizer:       new Chance()
+            randomizer:       new Chance(),
+            scrollableElements: []
         };
 
         /**
          * @mixes config
          */
         function scrollerGremlin() {
-            var position = config.positionSelector(),
+            config.scrollableElements.push(documentElement);
+
+            var indexEl = config.randomizer.natural({ max: config.scrollableElements.length  - 1 });
+            var el = config.scrollableElements[indexEl];
+
+            var position = config.positionSelector(el),
                 scrollX = position[0],
                 scrollY = position[1];
 
-            window.scrollTo(scrollX, scrollY);
+            el.scrollLeft = scrollX;
+            el.scrollTop = scrollY;
+
 
             if (typeof config.showAction == 'function') {
                 config.showAction(scrollX, scrollY);
